@@ -19,8 +19,7 @@ impl Pet {
     pub fn eat(&self) {
         println!("Pet is eating.");
         if self.owner.is_some() {
-            self.get_owner().unwrap().borrow_mut().increase_hp(10);
-            return;
+            self.get_owner().unwrap().borrow_mut().increase_hp(10)
         }
     }
 
@@ -38,5 +37,14 @@ impl Pet {
 
     pub fn get_owner(&self) -> Option<Rc<RefCell<Hero>>> {
         self.owner.clone()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn test_pet_new() {
+        let pet = super::Pet::new("Fluffy");
+        assert_eq!(pet.get_name(), "Fluffy");
     }
 }

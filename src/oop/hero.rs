@@ -71,3 +71,66 @@ impl Hero {
         self.hp = hp;
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_hero_new() {
+        let hero = Hero::new();
+        assert_eq!(hero.get_level(), 1);
+        assert_eq!(hero.get_hp(), 100);
+    }
+
+    #[test]
+    fn test_hero_increase_hp() {
+        let mut hero = Hero::new();
+        hero.increase_hp(10);
+        assert_eq!(hero.get_hp(), 110);
+    }
+
+    #[test]
+    fn test_hero_gain_exp() {
+        let mut hero = Hero::new();
+        let level_sheet = LevelSheet::new();
+        hero.gain_exp(1000, &level_sheet);
+        assert_eq!(hero.get_level(), 2);
+    }
+
+    #[test]
+    fn test_hero_set_pet() {
+        let mut hero = Hero::new();
+        let pet = Rc::new(RefCell::new(Pet::new("Fluffy")));
+        let hero_rc = Rc::new(RefCell::new(hero.clone()));
+
+        hero.set_pet(Rc::clone(&pet), hero_rc);
+
+        assert_eq!(hero.get_pet().unwrap().borrow().get_name(), "Fluffy");
+        assert_eq!(pet.borrow().get_owner().unwrap().borrow().get_level(), 1);
+    }
+
+    #[test]
+    fn test_hero_remove_pet() {
+        let mut hero = Hero::new();
+        let pet = Rc::new(RefCell::new(Pet::new("Fluffy")));
+
+        hero.set_pet(Rc::clone(&pet), Rc::new(RefCell::new(hero.clone())));
+        hero.remove_pet();
+
+        assert!(hero.get_pet().is_none());
+        assert!(pet.borrow().get_owner().is_none());
+    }
+
+    #[test]
+    fn test_pet_eat() {
+        let hero = Rc::new(RefCell::new(Hero::new()));
+        let pet = Rc::new(RefCell::new(Pet::new("Fluffy")));
+        let hero_rc = Rc::clone(&hero);
+
+        hero.borrow_mut().set_pet(Rc::clone(&pet), hero_rc);
+        pet.borrow().eat();
+
+        assert_eq!(hero.borrow().get_hp(), 110);
+    }
+}
